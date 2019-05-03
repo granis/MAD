@@ -887,6 +887,35 @@ class RmWrapper(DbWrapperBase):
         logger.debug("{}: submit_gyms done", str(origin))
         return True
 
+    def submit_gyms_detail_proto(self, origin, gym_proto):
+        logger.debug("RmWrapper::submit_gyms_detail_proto called with data received from {}", str(origin))
+        gym_details_args = []
+        now = datetime.utcfromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+        gym_result = gym_proto['result']
+        if gym_result != 1:
+            logger.debug("RmWrapper::submit_gyms_detail_proto result was not 1 {}", str(gym_result))
+            return False
+        gym_status_def = gym_proto.get("gym_status_and_defenders", None)
+        if gym_status_def is None:
+            return False
+        gym_id = gym_status_def["pokemon_fort_proto"]["id"]
+        gym_url = gym_proto['url']
+        gym_name = gym_proto['name']
+
+        logger.info("{}: inserting/updating gym '{}'/{}", str(origin), gym_name, gym_id)
+        query_gym_details = (
+            "INSERT INTO gymdetails (gym_id, name, url, last_scanned) "
+            "VALUES (%s, %s, %s, %s) "
+            "ON DUPLICATE KEY UPDATE name=VALUES(name), url=VALUES(url), last_scanned=VALUES(last_scanned)"
+        )
+        gym_details_args.append(
+            (
+                gym_id, gym_name, gym_url, now
+            )
+        )
+        self.executemany(query_gym_details, gym_details_args, commit=True)
+        return True
+
     def submit_raids_map_proto(self, origin, map_proto):
         logger.debug(
             "RmWrapper::submit_raids_map_proto called with data received from {}", str(origin))

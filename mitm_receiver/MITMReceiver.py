@@ -203,3 +203,5 @@ class MITMReceiver(object):
             elif type == 4:
                 self.__mitm_mapper.playerstats[origin].gen_player_stats(
                     data["payload"])
+            elif type == 156:
+                self._db_wrapper.submit_gyms_detail_proto(origin, data["payload"])

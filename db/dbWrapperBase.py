@@ -337,6 +337,13 @@ class DbWrapperBase(ABC):
         pass
 
     @abstractmethod
+    def submit_gyms_detail_proto(self, origin, gym_proto):
+        """
+        Update/Insert gym details (name, url) from a gym proto (156)
+        """
+        pass
+
+    @abstractmethod
     def submit_raids_map_proto(self, origin, map_proto):
         """
         Update/Insert raids from a map_proto dict
